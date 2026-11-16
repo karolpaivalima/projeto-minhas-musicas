@@ -1,37 +1,50 @@
-import express from "express";
-import cors from "cors";
-import mysql2 from "mysql2";
-import "dotenv/config";
+import express from "express"
+import cors from "cors"
+import mysql2 from "mysql2"
+import "dotenv/config"
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(cors());
+app.use(express.json())
+app.use(cors())
 
 const sql = mysql2.createPool({
     host: process.env.HOST_BANCO,
     user: process.env.USUARIO_BANCO,
     password: process.env.SENHA_BANCO,
     database: process.env.NOME_BANCO
-});
+})
 
 app.get("/", (request, response) => {
-    const comandoSelect = "SELECT * FROM musicas_Karoline";
+    const comandoSelect = "SELECT * FROM musicas_Karoline"
 
     sql.query(comandoSelect, (error, data) => {
         if (error) {
-            console.log(error);
-            return response.status(500).json({
-                erro: "Erro ao consultar o banco de dados"
-            });
+            console.log(error)
+            return
         }
 
-        response.json(data);
-    });
-});
+        response.json(data)
+    })
+})
+
+app.post("/cadastrar", (request, response) => {
+    const { titulo, artista, genero, ano, duracao } = request.body
+
+    const comandoInsert = "INSERT INTO musicas_Karoline(titulo, artista, genero, ano, duracao) VALUES (?, ?, ?, ?, ?)"
+
+    sql.query(comandoInsert, [titulo, artista, genero, ano, duracao], (error) => {
+        if (error) {
+            console.log(error)
+            return
+        }
+
+        response.status(201).json({ mensagem: "Música cadastrada com sucesso!" })
+    })
+})
 
 app.listen(3000, () => {
-    console.log("Servidor online");
-});
+    console.log("Servidor online")
+})
 
-export default app;
+export default app
